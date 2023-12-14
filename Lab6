@@ -7,9 +7,9 @@ private:
 	int size;
 
 public:
-	Vector() : size(0), array(nullptr) {}         
+	Vector() : size(0), array(nullptr) {}
 	Vector(int newSize) : size(newSize) {
-		array = new int[size];                   
+		array = new int[size];
 		srand(time(0));
 		for (int i = 0; i < size; ++i) {
 			array[i] = rand() % 101;
@@ -159,47 +159,46 @@ public:
 		setValueAt(index2, temp);
 	}
 
-	void shakerSort() {
-		int left = 0;
-		int right = size - 1;
+	void heapify() {
+		int largest = i;
+		int left = 2 * i + 1;
+		int right = 2 * i + 2;
 
-		while (left <= right) {
-			for (int i = left; i < right; ++i) {
-				if (getValueAt(i) > getValueAt(i + 1)) {
-					swap(i, i + 1);
-				}
-			}
+		if (left < size && array[left] > array[largest])
+			largest = left;
 
-			--right;
+		if (right < size && array[right] > array[largest])
+			largest = right;
 
-			for (int i = right; i > left; --i) {
-				if (getValueAt(i) < getValueAt(i - 1)) {
-					swap(i, i - 1);
-				}
-			}
-
-			++left;
+		if (largest != i) {
+			swap(array[i], array[largest]);
+			heapify();
 		}
 	}
 
-	void combSort() {
-		int n = size, h = size, i, k, temp;
-		if (n > 1) {
-			h = h / 1.247;
-			if (h < 1) {
-				h = 1;
-			}
-			while (h >= 1) {
-				for (i = 0; (i + h) < n; i++) {
-					if (getValueAt(i) > getValueAt(i + h)) {
-						swap(i, i + h);
-						k = i;
-					}
-				}
-				h = h / 1.247;
+	void heapSort() {
+		for (int i = size / 2 - 1; i >= 0; i--)
+			heapify();
+
+		for (int i = size - 1; i >= 0; i--) {
+			swap(array[0], array[i]);
+			heapify();
+		}
+	}
+
+
+	void stupidSort() {
+		if (size == 1)
+			return;
+
+		for (int i = 0; i < size - 1; i++) {
+			if (array[i] > array[i + 1]) {
+				swap(array[i], array[i + 1]);
+				stupidSort();
 			}
 		}
 	}
+
 
 	// Выводит текущее состояние массива
 	void printArray() const {
@@ -246,14 +245,14 @@ int main() {
 	vec.printArray();
 	std::cout << std::endl;
 
-	vec.shakerSort();
-	std::cout << "Массив, сортированный Шейкеров: ";
+	vec.heapify();
+	vec.heapSort();
+	std::cout << "Массив (пирамидальная сортировка): ";
 	vec.printArray();
 
-	vec1.combSort();
-	std::cout << "Массив, сортированный Расчёской: ";
+	vec1.stupidSort();
+	std::cout << "Массив, (глупая сортировка): ";
 	vec1.printArray();
 
-	system("PAUSE");
 	return 0;
 }
