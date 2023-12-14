@@ -1,0 +1,259 @@
+#include <iostream>
+#include <ctime>
+
+class Vector {
+private:
+	int* array;
+	int size;
+
+public:
+	Vector() : size(0), array(nullptr) {}         
+	Vector(int newSize) : size(newSize) {
+		array = new int[size];                   
+		srand(time(0));
+		for (int i = 0; i < size; ++i) {
+			array[i] = rand() % 101;
+		}
+	}
+
+	~Vector() {
+		clear();
+	}
+
+	void resize(int newSize, int value = 0) {
+		if (newSize < size) {
+			int* newArray = new int[newSize];
+			for (int i = 0; i < newSize; ++i) {
+				newArray[i] = array[i];
+			}
+			delete[] array;
+			array = newArray;
+			size = newSize;
+		}
+
+		else if (newSize > size) {
+			int* newArray = new int[newSize];
+			for (int i = 0; i < size; ++i) {
+				newArray[i] = array[i];
+			}
+			for (int i = size; i < newSize; ++i) {
+				newArray[i] = value;
+			}
+			delete[] array;
+			array = newArray;
+			size = newSize;
+		}
+	}
+
+	// Проверяет, пуст ли вектор
+
+	bool empty() const {
+		if (size == 0) {
+			std::cerr << "Вектор пуст" << std::endl;
+			return size == 0;
+		}
+		else {
+			std::cerr << "Вектор не пуст" << std::endl;
+			return size == 1;
+		}
+	}
+
+	// Добавляет элемент в конец вектора
+	void push_back(int value) {
+		resize(size + 1);
+		setValueAt(size - 1, value);
+	}
+
+	// Удаляет элемент с конца вектора
+	void pop_back() {
+		if (size > 0) {
+			--size;
+			// Освобождаем память за последним элементом
+			int newSize = size;
+			int* newArray = new int[newSize];
+			for (int i = 0; i < newSize; ++i) {
+				newArray[i] = array[i];
+			}
+			delete[] array;
+			array = newArray;
+		}
+		else {
+
+			std::cout << "Массив уже пуст" << std::endl;
+			exit(1);
+		}
+	}
+
+
+	// Метод insert() добавляет элементы в начало вектора
+	void insert(int value) {
+		resize(size + 1);
+		for (int i = size - 1; i > 0; --i) {
+			setValueAt(i, getValueAt(i - 1));
+		}
+		setValueAt(0, value);
+	}
+
+	// Метод insert(it, n, value) вставляет n элементов value начиная с позиции, на которую указывает it
+	void insert(int* it, int n, int value) {
+		int index = it - array;
+		resize(size + n);
+		for (int i = size - 1; i >= index + n; --i) {
+			setValueAt(i, getValueAt(i - n));
+		}
+		for (int i = index; i < index + n; ++i) {
+			setValueAt(i, value);
+		}
+	}
+
+
+	// Возвращает первый элемент вектора
+	int front() const {
+		if (empty()) {
+			std::cerr << "Вектор пуст!" << std::endl;
+			exit(1);
+		}
+		return array[0];
+	}
+
+	// Возвращает последний элемент вектора
+	int back() const {
+		if (size > 0) {
+			return array[size - 1];
+		}
+		std::cerr << "Вектор пуст!" << std::endl;
+		exit(1);
+	}
+
+	// Удаляет элемент по указанной позиции
+	void erase(int position) {
+		if (position < size && size > 0) {
+			for (int i = position; i < size - 1; ++i) {
+				setValueAt(i, getValueAt(i + 1));
+			}
+			--size;
+			// Освобождаем память за последним элементом
+			int newSize = size;
+			int* newArray = new int[newSize];
+			for (int i = 0; i < newSize; ++i) {
+				newArray[i] = array[i];
+			}
+			delete[] array;
+			array = newArray;
+		}
+		else {
+			std::cout << "Ошибка при удалении элемента" << std::endl;           //  выводит ошибку
+		}
+	}
+
+	// Очищает вектор
+	void clear() {
+		delete[] array;
+		array = nullptr;
+		size = 0;
+	}
+
+	void swap(int index1, int index2) {
+		int temp = getValueAt(index1);
+		setValueAt(index1, getValueAt(index2));
+		setValueAt(index2, temp);
+	}
+
+	void shakerSort() {
+		int left = 0;
+		int right = size - 1;
+
+		while (left <= right) {
+			for (int i = left; i < right; ++i) {
+				if (getValueAt(i) > getValueAt(i + 1)) {
+					swap(i, i + 1);
+				}
+			}
+
+			--right;
+
+			for (int i = right; i > left; --i) {
+				if (getValueAt(i) < getValueAt(i - 1)) {
+					swap(i, i - 1);
+				}
+			}
+
+			++left;
+		}
+	}
+
+	void combSort() {
+		int n = size, h = size, i, k, temp;
+		if (n > 1) {
+			h = h / 1.247;
+			if (h < 1) {
+				h = 1;
+			}
+			while (h >= 1) {
+				for (i = 0; (i + h) < n; i++) {
+					if (getValueAt(i) > getValueAt(i + h)) {
+						swap(i, i + h);
+						k = i;
+					}
+				}
+				h = h / 1.247;
+			}
+		}
+	}
+
+	// Выводит текущее состояние массива
+	void printArray() const {
+		for (int i = 0; i < size; ++i) {
+			std::cout << getValueAt(i) << " ";
+		}
+		std::cout << std::endl;
+	}
+
+	// Получение значения по индексу
+	int getValueAt(int index) const {
+		if (index >= 0 && index < size) {
+			return array[index];
+		}
+
+		std::cout << "Индекс за пределами!" << std::endl;
+		exit(1);
+	}
+
+	// Установка значения по индексу
+	void setValueAt(int index, int value) {
+		if (index >= 0 && index < size) {
+			array[index] = value;
+		}
+		else {
+			std::cout << "Индекс за пределами!" << std::endl;
+			exit(1);
+		}
+	}
+
+};
+
+int main() {
+	setlocale(LC_ALL, "Russian");
+	int size;
+	std::cout << "Введите размер массива: ";
+	std::cin >> size;
+
+	// новый конструктор с инициализацией случайных чисел
+	Vector vec(size);
+	Vector vec1(size);
+
+	std::cout << "Исходный массив 1: ";
+	vec.printArray();
+	std::cout << std::endl;
+
+	vec.shakerSort();
+	std::cout << "Массив, сортированный Шейкеров: ";
+	vec.printArray();
+
+	vec1.combSort();
+	std::cout << "Массив, сортированный Расчёской: ";
+	vec1.printArray();
+
+	system("PAUSE");
+	return 0;
+}
